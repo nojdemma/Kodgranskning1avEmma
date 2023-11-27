@@ -539,10 +539,7 @@ void ioopm_checkout_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioop
     ioopm_hash_table_destroy(single_cart);
     ioopm_hash_table_remove(carts, int_elem(cart_nr));
 }
-
-int ioopm_quit_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts, int *total_carts, ioopm_list_t *shelves)
-{   
-    // carts
+static void ioopm_quit_db_carts(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts){
     ioopm_list_t *keys_carts = ioopm_hash_table_keys(carts);
 
     for (int i = 0; i < ioopm_linked_list_size(keys_carts); i++)
@@ -550,8 +547,10 @@ int ioopm_quit_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_has
         int cart_nr = ioopm_linked_list_get(keys_carts, i).i;
         ioopm_remove_cart_db(db, storage, carts, cart_nr);
     }
+    ioopm_linked_list_destroy(keys_carts);
+}
 
-    // db
+static void ioopm_quit_db_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts, ioopm_list_t *shelves){
     ioopm_list_t *keys_db = ioopm_hash_table_keys(db);
 
     for (int i = 0; i < ioopm_linked_list_size(keys_db); i++)
@@ -570,12 +569,20 @@ int ioopm_quit_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_has
         free(shelf);
     }
     ioopm_linked_list_destroy(shelves);
-    // storage
-    ioopm_hash_table_destroy(storage);
-    ioopm_linked_list_destroy(keys_carts);
-    ioopm_hash_table_destroy(carts);
-    free(total_carts);
+}
 
+static void ioopm_quit_db_storage(ioopm_hash_table_t *storage, ioopm_hash_table_t *carts, int *total_carts){
+    ioopm_hash_table_destroy(storage);
+    ioopm_hash_table_destroy(carts);
+    free(total_carts);  
+}
+
+
+int ioopm_quit_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts, int *total_carts, ioopm_list_t *shelves)
+{   
+    ioopm_quit_db_carts(db, storage, carts);
+    ioopm_quit_db_db(db, storage, carts, shelves);
+    ioopm_quit_db_storage(storage, carts, total_carts);
     return 0;
 }
 
