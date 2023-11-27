@@ -10,15 +10,13 @@
  * @brief A backend implementation of a store.
  */
 
-static bool equal_int(elem_t element_1, elem_t element_2)
+static bool equal_int_keys(elem_t element_1, elem_t element_2)
 {
-    // Function is used when keys are integers
     return element_1.i == element_2.i;
 }
 
 static int hash_function_int(elem_t key)
 {
-    // Takes the integer value of a key and returns a bucket for that integer
     int int_key = key.i;
     int bucket = int_key % No_Buckets;
     return bucket;
@@ -26,7 +24,6 @@ static int hash_function_int(elem_t key)
 
 static int hash_function_char(elem_t key)
 {
-    // Hash function for when key is char*
     char *char_key = key.p;
     int i = 0;
     int hash = 0;
@@ -41,9 +38,9 @@ static int hash_function_char(elem_t key)
     bucket = abs(bucket);
     return bucket;
 }
+
 static bool element_equal_char(elem_t a, elem_t b)
 {
-    // Function is used when wanting to compare two char *
     char *letter_a = a.p;
     char *letter_b = b.p;
 
@@ -411,7 +408,7 @@ void ioopm_print_carts_db(ioopm_hash_table_t *carts)
 
 void ioopm_create_cart_db(ioopm_hash_table_t *carts, int *total_carts)
 {
-    ioopm_hash_table_t *new_cart = ioopm_hash_table_create(hash_function_char, element_equal_char, equal_int);
+    ioopm_hash_table_t *new_cart = ioopm_hash_table_create(hash_function_char, element_equal_char, equal_int_keys);
     *total_carts = *total_carts + 1;
     int cart_nr = *total_carts;
     ioopm_hash_table_insert(carts, int_elem(cart_nr), ptr_elem(new_cart));
@@ -442,15 +439,24 @@ void ioopm_remove_cart_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, i
 
 void ioopm_add_to_cart_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts, int cart_nr, elem_t merch_n, int quantity)
 {
-    // checka finns det i hash table, redan gjort??
     elem_t result;
-    // checka finns det i storage
+
+    if(ioopm_hash_table_lookup(db, merch_n, &result))
+    {
+        merch_t *m = (merch_t *)result.p;
+        ioopm_list_t *loc = m->location;
+        int length = ioopm_linked_list_size(loc);
+        if(length == 0){
+            printf("The wanted merch have no stock.");
+            return; 
+        }
+    }
 
     while (!in_stock(db, storage, merch_n, quantity))
     {
         quantity = ask_question_int("\nThe requested quantity is not in stock, please request another quantity:\n");
     }
-    // insert i rätt cart
+
     ioopm_hash_table_lookup(carts, int_elem(cart_nr), &result);
     ioopm_hash_table_t *single_cart = (ioopm_hash_table_t *)result.p;
     if (ioopm_hash_table_has_key(single_cart, merch_n))
@@ -539,6 +545,7 @@ void ioopm_checkout_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioop
     ioopm_hash_table_destroy(single_cart);
     ioopm_hash_table_remove(carts, int_elem(cart_nr));
 }
+
 static void ioopm_quit_db_carts(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_hash_table_t *carts){
     ioopm_list_t *keys_carts = ioopm_hash_table_keys(carts);
 
@@ -588,7 +595,7 @@ int ioopm_quit_db(ioopm_hash_table_t *db, ioopm_hash_table_t *storage, ioopm_has
 
 ioopm_hash_table_t *ioopm_create_carts()
 {
-    ioopm_hash_table_t *carts = ioopm_hash_table_create(hash_function_int, equal_int, equal_int);
+    ioopm_hash_table_t *carts = ioopm_hash_table_create(hash_function_int, equal_int_keys, equal_int_keys);
     return carts;
 }
 
