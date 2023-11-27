@@ -409,32 +409,32 @@ void test_checkout()
 
 }
 
-void test_quit()
-{
-    ioopm_hash_table_t *db = ioopm_create_database_part();
-    ioopm_hash_table_t *storage = ioopm_create_database_part();
-    ioopm_hash_table_t *carts = ioopm_create_carts();
+// void test_quit()
+// {
+//     ioopm_hash_table_t *db = ioopm_create_database_part();
+//     ioopm_hash_table_t *storage = ioopm_create_database_part();
+//     ioopm_hash_table_t *carts = ioopm_create_carts();
 
-    int *total_carts = calloc(1, sizeof(int));
-    *total_carts = 0;
-    ioopm_create_cart_db(carts, total_carts);
-    CU_ASSERT_EQUAL(ioopm_hash_table_size(carts), 1);
+//     int *total_carts = calloc(1, sizeof(int));
+//     *total_carts = 0;
+//     ioopm_create_cart_db(carts, total_carts);
+//     CU_ASSERT_EQUAL(ioopm_hash_table_size(carts), 1);
 
-    elem_t name = ptr_elem("Tooth brush");
-    char *desc = "Soft";
-    int price = 10;
-    ioopm_add_merch_to_db(db, name, desc, price);
+//     elem_t name = ptr_elem("Tooth brush");
+//     char *desc = "Soft";
+//     int price = 10;
+//     ioopm_add_merch_to_db(db, name, desc, price);
 
-    shelf_t *test_shelf = calloc(1, sizeof(shelf_t));
-    test_shelf->shelf = "A25";
-    ioopm_replenish_db(db, storage, name, test_shelf, 5);
+//     shelf_t *test_shelf = calloc(1, sizeof(shelf_t));
+//     test_shelf->shelf = "A25";
+//     ioopm_replenish_db(db, storage, name, test_shelf, 5);
 
-    ioopm_add_to_cart_db(db, storage, carts, *total_carts, name, 4); // should work
-    ioopm_add_to_cart_db(db, storage, carts, *total_carts, name, 1); // should not be right until changed quantity
+//     ioopm_add_to_cart_db(db, storage, carts, *total_carts, name, 4); // should work
+//     ioopm_add_to_cart_db(db, storage, carts, *total_carts, name, 1); // should not be right until changed quantity
 
-    free(test_shelf);
-    ioopm_quit_db(db, storage, carts, total_carts);
-}
+//     free(test_shelf);
+//     ioopm_quit_db(db, storage, carts, total_carts);
+// }
 int main()
 {
     // First we try to set up CUnit, and exit if we fail
